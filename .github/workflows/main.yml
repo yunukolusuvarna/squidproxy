@@ -1,0 +1,30 @@
+Resources:
+#key-05174d486f5b2ba68
+  
+  ProxyInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      ImageId: ami-041feb57c611358bd
+      KeyName: key1
+      
+      SecurityGroups:
+        - !Ref ProxySecurityGroup
+      UserData:
+        Fn::Base64:
+          Fn::Sub: |
+            #!/bin/bash
+            sudo yum update -y
+            sudo yum install docker -y
+            sudo service docker start
+            sudo docker run -d --name squid-proxy -p 3128:3128 your-squid-proxy-image
+
+  ProxySecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security Group for Squid Proxy
+      SecurityGroupIngress:
+        - CidrIp: 0.0.0.0/0
+          FromPort: 3128
+          ToPort: 3128
+          IpProtocol: tcp
